@@ -1,0 +1,34 @@
+---
+- hosts: webservers
+  tasks:
+    - name: install apache2
+      apt: name=apache2 update_cache=yes state=latest
+
+    - name: Loome public_html kataloog user_ile
+      file:
+       path=/home/root/public_html
+       owner=root
+       group=root
+       mode=0755
+       state=directory
+
+    - name: Lubame userdir mod
+      apache2_module: name=userdir state=present
+      notify:
+        - systemctl restart apache2
+
+    - name: Kopeerisime index.html rshaansible
+      fetch: src=/var/www/html/index.html dest=./index.html flat=yes
+
+    - name: Kopeerisime user_ile index.html
+      copy:
+        src: ./index.html
+        dest: /home/root/public_html/
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Alglaadimine Apache2
+      service:
+        name: apache2
+        state: restarted
